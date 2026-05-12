@@ -1,0 +1,131 @@
+from flask import Blueprint, jsonify, request
+from database.db import mysql
+from utils.auth_utils import token_required, seller_required
+
+spareparts_bp = Blueprint("spareparts", __name__)
+
+
+@spareparts_bp.route("/", methods=["GET"])
+def get_parts():
+
+    cur = mysql.connection.cursor()
+
+    cur.execute("SELECT * FROM sparepart")
+
+    parts = cur.fetchall()
+
+    cur.close()
+
+    result = []
+
+    for part in parts:
+
+        result.append({
+            "Part_ID": part[0],
+            "Seller_ID": part[1],
+            "Part_name": part[2],
+            "Price": str(part[3]),
+            "Stock_Quantity": part[4],
+            "Description": part[5]
+        })
+
+    return jsonify(result)
+
+
+@spareparts_bp.route("/add", methods=["POST"])
+@token_required
+@seller_required
+def add_part(current_user):
+
+    data = request.get_json()
+
+    seller_id = data["seller_id"]
+
+    part_name = data["part_name"]
+    price = data["price"]
+    stock_quantity = data["stock_quantity"]
+    description = data["description"]
+
+    cur = mysql.connection.cursor()
+
+    query = """
+    INSERT INTO sparepart
+    (Seller_ID, Part_name, Price, Stock_Quantity, Description)
+    VALUES (%s, %s, %s, %s, %s)
+    """
+
+    cur.execute(query, (
+        seller_id,
+        part_name,
+        price,
+        stock_quantity,
+        description
+    ))
+
+    mysql.connection.commit()
+
+    cur.close()
+
+    return jsonify({
+        "message": "Spare part added successfully"
+    })
+
+
+@spareparts_bp.route("/update/<int:part_id>", methods=["PUT"])
+@token_required
+@seller_required
+def update_part(current_user, part_id):
+
+    data = request.get_json()
+
+    part_name = data["part_name"]
+    price = data["price"]
+    stock_quantity = data["stock_quantity"]
+    description = data["description"]
+
+    cur = mysql.connection.cursor()
+
+    query = """
+    UPDATE sparepart
+    SET Part_name=%s,
+        Price=%s,
+        Stock_Quantity=%s,
+        Description=%s
+    WHERE Part_ID=%s
+    """
+
+    cur.execute(query, (
+        part_name,
+        price,
+        stock_quantity,
+        description,
+        part_id
+    ))
+
+    mysql.connection.commit()
+
+    cur.close()
+
+    return jsonify({
+        "message": "Spare part updated successfully"
+    })
+
+
+@spareparts_bp.route("/delete/<int:part_id>", methods=["DELETE"])
+@token_required
+@seller_required
+def delete_part(current_user, part_id):
+
+    cur = mysql.connection.cursor()
+
+    query = "DELETE FROM sparepart WHERE Part_ID=%s"
+
+    cur.execute(query, [part_id])
+
+    mysql.connection.commit()
+
+    cur.close()
+
+    return jsonify({
+        "message": "Spare part deleted successfully"
+    })
