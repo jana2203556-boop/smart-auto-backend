@@ -57,3 +57,29 @@ def seller_required(f):
         return f(current_user, *args, **kwargs)
 
     return decorated
+def customer_required(f):
+    @wraps(f)
+    def decorated(current_user, *args, **kwargs):
+
+        if current_user["role_id"] != 1:
+            return jsonify({
+                "message": "Access denied. Customers only."
+            }), 403
+
+        return f(current_user, *args, **kwargs)
+
+    return decorated
+
+
+def admin_required(f):
+    @wraps(f)
+    def decorated(current_user, *args, **kwargs):
+
+        if current_user["role_id"] != 3:
+            return jsonify({
+                "message": "Access denied. Admins only."
+            }), 403
+
+        return f(current_user, *args, **kwargs)
+
+    return decorated

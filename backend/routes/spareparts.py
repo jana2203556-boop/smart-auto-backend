@@ -129,3 +129,38 @@ def delete_part(current_user, part_id):
     return jsonify({
         "message": "Spare part deleted successfully"
     })
+@spareparts_bp.route("/search", methods=["GET"])
+def search_spare_parts():
+
+    part_name = request.args.get("name")
+
+    cur = mysql.connection.cursor()
+
+    query = """
+    SELECT *
+    FROM sparepart
+    WHERE Part_name LIKE %s
+    """
+
+    search_value = "%" + part_name + "%"
+
+    cur.execute(query, [search_value])
+
+    spareparts = cur.fetchall()
+
+    cur.close()
+
+    result = []
+
+    for part in spareparts:
+
+        result.append({
+            "part_id": part[0],
+            "seller_id": part[1],
+            "part_name": part[2],
+            "price": str(part[3]),
+            "stock_quantity": part[4],
+            "description": part[5]
+        })
+
+    return jsonify(result)
