@@ -10,7 +10,8 @@ from routes.orders import orders_bp
 from routes.workshops import workshops_bp
 from routes.admin import admin_bp
 from routes.payments import payments_bp
-
+from routes.reviews import reviews_bp
+from routes.notifications import notifications_bp
 app = Flask(__name__)
 
 CORS(app)
@@ -29,7 +30,8 @@ app.register_blueprint(orders_bp, url_prefix="/orders")
 app.register_blueprint(workshops_bp, url_prefix="/workshops")
 app.register_blueprint(admin_bp, url_prefix="/admin")
 app.register_blueprint(payments_bp, url_prefix="/payments")
-
+app.register_blueprint(reviews_bp, url_prefix="/reviews")
+app.register_blueprint(notifications_bp, url_prefix="/notifications")
 @app.route("/")
 def home():
     return {"message": "Smart Auto Backend Running"}

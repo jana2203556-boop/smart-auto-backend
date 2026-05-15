@@ -197,6 +197,32 @@ def paymob_callback():
 ))
 
     mysql.connection.commit()
+    user_query = """
+SELECT User_ID
+FROM orders
+WHERE Order_ID = %s
+"""
+
+    cur.execute(user_query, (local_order_id,))
+    user_result = cur.fetchone()
+    user_id = user_result[0]
+    notification_query = """
+    INSERT INTO notification (
+    User_ID,
+    Message
+)
+    VALUES (%s, %s)
+"""
+
+    notification_message = f"Your payment for order #{local_order_id} was successful."
+
+    cur.execute(notification_query, (
+    user_id,
+    notification_message
+))
+
+    mysql.connection.commit()
+    print("NOTIFICATION INSERTED", flush=True)
     cur.close()
 
     print("LOCAL ORDER ID:", local_order_id, flush=True)
