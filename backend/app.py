@@ -9,6 +9,7 @@ from routes.spareparts import spareparts_bp
 from routes.orders import orders_bp
 from routes.workshops import workshops_bp
 from routes.admin import admin_bp
+from routes.payments import payments_bp
 
 app = Flask(__name__)
 
@@ -27,6 +28,7 @@ app.register_blueprint(spareparts_bp, url_prefix="/spareparts")
 app.register_blueprint(orders_bp, url_prefix="/orders")
 app.register_blueprint(workshops_bp, url_prefix="/workshops")
 app.register_blueprint(admin_bp, url_prefix="/admin")
+app.register_blueprint(payments_bp, url_prefix="/payments")
 
 @app.route("/")
 def home():

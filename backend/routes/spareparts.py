@@ -164,3 +164,112 @@ def search_spare_parts():
         })
 
     return jsonify(result)
+# FILTER SPARE PARTS BY PRICE
+@spareparts_bp.route("/filter", methods=["GET"])
+def filter_parts():
+
+    min_price = request.args.get("min_price")
+    max_price = request.args.get("max_price")
+
+    cur = mysql.connection.cursor()
+
+    query = """
+    SELECT *
+    FROM sparepart
+    WHERE Price BETWEEN %s AND %s
+    """
+
+    cur.execute(query, (
+        min_price,
+        max_price
+    ))
+
+    parts = cur.fetchall()
+
+    cur.close()
+
+    result = []
+
+    for part in parts:
+
+        result.append({
+            "part_id": part[0],
+            "seller_id": part[1],
+            "part_name": part[2],
+            "description": part[3],
+            "price": float(part[4]),
+            "stock_quantity": part[5]
+        })
+
+    return jsonify(result)
+# GET IN-STOCK SPARE PARTS
+@spareparts_bp.route("/in-stock", methods=["GET"])
+def get_in_stock_parts():
+
+    cur = mysql.connection.cursor()
+
+    query = """
+    SELECT *
+    FROM sparepart
+    WHERE Stock_Quantity > 0
+    """
+
+    cur.execute(query)
+
+    parts = cur.fetchall()
+    cur.close()
+
+    result = []
+
+    for part in parts:
+     result.append({
+    "part_id": part[0],
+    "seller_id": part[1],
+    "part_name": part[2],
+    "price": float(part[3]),
+    "stock_quantity": part[4],
+    "description": part[5]
+})
+
+    return jsonify(result)
+# COMBINED SEARCH + FILTER SPARE PARTS
+@spareparts_bp.route("/search-filter", methods=["GET"])
+def search_filter_parts():
+
+    name = request.args.get("name")
+    min_price = request.args.get("min_price")
+    max_price = request.args.get("max_price")
+
+    cur = mysql.connection.cursor()
+
+    query = """
+    SELECT *
+    FROM sparepart
+    WHERE Part_name LIKE %s
+    AND Price BETWEEN %s AND %s
+    """
+
+    search_value = "%" + name + "%"
+
+    cur.execute(query, (
+        search_value,
+        min_price,
+        max_price
+    ))
+
+    parts = cur.fetchall()
+    cur.close()
+
+    result = []
+
+    for part in parts:
+        result.append({
+            "part_id": part[0],
+            "seller_id": part[1],
+            "part_name": part[2],
+            "price": float(part[3]),
+            "stock_quantity": part[4],
+            "description": part[5]
+        })
+
+    return jsonify(result)

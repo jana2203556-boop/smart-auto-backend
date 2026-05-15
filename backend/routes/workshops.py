@@ -193,3 +193,75 @@ def get_all_bookings(current_user):
         })
 
     return jsonify(result)
+# SEARCH WORKSHOPS BY LOCATION
+@workshops_bp.route("/search", methods=["GET"])
+def search_workshops():
+
+    location = request.args.get("location")
+
+    cur = mysql.connection.cursor()
+
+    query = """
+    SELECT *
+    FROM workshop
+    WHERE Location LIKE %s
+    """
+
+    cur.execute(query, (
+        "%" + location + "%",
+    ))
+
+    workshops = cur.fetchall()
+
+    cur.close()
+
+    result = []
+
+    for workshop in workshops:
+
+        result.append({
+            "workshop_id": workshop[0],
+            "user_id": workshop[1],
+            "workshop_name": workshop[2],
+            "location": workshop[3],
+            "service_type": workshop[4],
+            "approval_status": workshop[5]
+        })
+
+    return jsonify(result)
+# FILTER WORKSHOPS BY SERVICE TYPE
+@workshops_bp.route("/filter", methods=["GET"])
+def filter_workshops():
+
+    service = request.args.get("service")
+
+    cur = mysql.connection.cursor()
+
+    query = """
+    SELECT *
+    FROM workshop
+    WHERE Service_type LIKE %s
+    """
+
+    cur.execute(query, (
+        "%" + service + "%",
+    ))
+
+    workshops = cur.fetchall()
+
+    cur.close()
+
+    result = []
+
+    for workshop in workshops:
+
+        result.append({
+            "workshop_id": workshop[0],
+            "user_id": workshop[1],
+            "workshop_name": workshop[2],
+            "location": workshop[3],
+            "service_type": workshop[4],
+            "approval_status": workshop[5]
+        })
+
+    return jsonify(result)
